@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height">
+    <meta name="ROBOTS" content="NOINDEX, NOFOLLOW">
+    <title>Denny's Knockout Demo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="wrapper">
+        <header class="navbar navbar-dark navbar-fixed-top bg-inverse">
+            <div class="clearfix">
+                <a class="navbar-brand">
+                    <img src="images/dennys-logo.png" alt="logo">
+                </a>
+            </div>
+            <ul class="nav nav-tabs" id="navigation">
+                <li class="nav-item"><a data-bind="css: {active: page() === 'specials'}" class="nav-link" href="#/specials">Home</a></li>
+                <li class="nav-item"><a data-bind="css: {active: page() === 'breakfast'}" class="nav-link" href="#/breakfast">Breakfast</a></li>
+                <li class="nav-item"><a data-bind="css: {active: page() === 'lunch'}" class="nav-link" href="#/lunch">Lunch</a></li>
+                <li class="nav-item"><a data-bind="css: {active: page() === 'myorder' || page() === 'thanks'}" class="nav-link" href="#/myorder">My Order <span data-bind="text: menus.myorder().length, visible: menus.myorder().length > 0" class="label label-default"></span></a></li>
+            </ul>
+        </header>
+        <main id="app">
+            <div class="container">
+                <h1 data-bind="text: pageTitle">Today's Specials</h1>
+                <div id="specials" class="page" data-bind="css: {active: page() === 'specials'}">
+                    <div class="menu-items" data-bind="foreach: menus.specials, visible: !viewMenuItem()">
+                        <menu-item params="item: $data" class="menu-item" data-bind="attr: {id: $data.id}"></menu-item>
+                    </div>
+                    <div class="view-item" data-bind="if: viewMenuItem()">
+                        <view-item></view-item>
+                    </div>
+                    <p data-bind="visible: menus.specials().length < 1">Loading...</p>
+                </div>
+                <div id="breakfast" class="page" data-bind="css: {active: page() === 'breakfast'}">
+                    <div class="menu-items" data-bind="foreach: menus.breakfast, visible: !viewMenuItem()">
+                        <menu-item params="item: $data" class="menu-item" data-bind="attr: {id: $data.id}"></menu-item>
+                    </div>
+                    <div class="view-item" data-bind="if: viewMenuItem()">
+                        <view-item></view-item>
+                    </div>
+                    <p data-bind="visible: menus.breakfast().length < 1">Loading...</p>
+                </div>
+                <div id="lunch" class="page" data-bind="css: {active: page() === 'lunch'}">
+                    <div class="menu-items" data-bind="foreach: menus.lunch, visible: !viewMenuItem()">
+                        <menu-item params="item: $data" class="menu-item" data-bind="attr: {id: $data.id}"></menu-item>
+                    </div>
+                    <div class="view-item" data-bind="if: viewMenuItem()">
+                        <view-item></view-item>
+                    </div>
+                    <p data-bind="visible: menus.lunch().length < 1">Loading...</p>
+                </div>
+                <div id="myorder" class="page" data-bind="css: {active: page() === 'myorder'}">
+                    <div data-bind="visible: menus.myorder().length > 0">
+                        <div class="my-order" data-bind="foreach: menus.myorder">
+                            <my-order-item params="item: $data" data-bind="attr: {id: $data.id}"></my-order-item>
+                        </div>
+                        <div class="row checkout">
+                            <div class="col-sm-8 col-sm-offset-4">
+                                <table>
+                                    <tr>
+                                        <td>Subtotal</td>
+                                        <td data-bind="text: '$' + subtotal()"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tax</td>
+                                        <td data-bind="text: '$' + tax()"></td>
+                                    </tr>
+                                    <tr class="total">
+                                        <td>Total</td>
+                                        <td data-bind="text: '$' + total()"></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2">
+                                            <button data-bind="click: placeOrder" type="button" name="action" value="Place Order" class="btn btn-lg btn-primary">Place Order</button>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <p data-bind="visible: menus.myorder().length < 1">You haven't ordered anything yet.</p>
+                </div>
+                <div id="thanks" class="page" data-bind="css: {active: page() === 'thanks'}">
+                    <p>Your order should be ready in approximately 14 minutes.</p>
+                </div>
+            </div><!-- end container -->
+        </main>
+        <footer></footer>
+    </div><!--end wrapper -->
+    <script type="text/html" id="menu-item-template">
+        <div class="card">
+            <img class="card-img-top" data-bind="attr: {src: 'images/' + image, alt: ''}" src="images/blank.gif" alt="">
+            <div class="card-block">
+                <div class="card-equalizer">
+                    <h4 class="card-title" data-bind="text: title">Title</h4>
+                    <p class="card-text" data-bind="text: description">Description</p>
+                </div>
+                <p class="price" data-bind="text: '$' + price">Price</p>
+                <div class="menuButtons">
+                    <input data-bind="click: toggleItemView, value: viewButtonText, css: {'btn-primary': !view(), 'btn-danger': view()}" type="button" class="btn" value="View">
+                    <input data-bind="click: toggleAddToOrder, value: orderButtonText, css: {'btn-primary': !ordered(), 'btn-danger': ordered()}" type="button" class="btn" value="Add to Order">
+                </div>
+            </div>
+        </div>
+    </script>
+    <script type="text/html" id="view-item-template">
+        <div class="card">
+            <div class="view-item-row">
+                <div class="view-item-image">
+                    <img class="card-img-top" data-bind="attr: {src: 'images/' + image, alt: ''}" src="images/blank.gif" alt="">
+                </div>
+                <div class="view-item-details">
+                    <form class="card-block">
+                        <h4 class="card-title" data-bind="text: title">Title</h4>
+                        <p class="card-text" data-bind="text: description">Description</p>
+                        <p class="price" data-bind="text: '$' + price">Price</p>
+                        <small class="text-muted">Special requests  (e.g. Eggs over easy)</small>
+                        <textarea data-bind="value: specialRequests" class="form-control ta" rows="3"></textarea>
+                        <div class="menuButtons">
+                            <input data-bind="click: toggleItemView, value: viewButtonText, css: {'btn-primary': !view(), 'btn-danger': view()}" type="button" class="btn" value="View">
+                            <input data-bind="click: toggleAddToOrder, value: orderButtonText, css: {'btn-primary': !ordered(), 'btn-danger': ordered()}" type="button" class="btn" value="Add to Order">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </script>
+    <script type="text/html" id="my-order-template">
+        <div class="row">
+            <div class="my-order-image"><img data-bind="attr: {src: 'images/' + image, alt: ''}" src="images/blank.gif" alt=""></div>
+            <form class="my-order-details">
+                <h4 data-bind="text: title">Title</h4>
+                <p class="price" data-bind="text: '$' + price">Price</p>
+                <small class="text-muted">Special requests (e.g. Eggs over easy)</small>
+                <textarea data-bind="value: specialRequests" class="form-control ta"></textarea>
+                <div class="menuButtons">
+                    <input data-bind="click: toggleAddToOrder" value="Remove from Order" type="button" class="btn btn-danger">
+                </div>
+            </form>
+        </div>
+    </script>
+    <script src="vendor.js"></script>
+    <script>
+        var app = {};
+
+        app.database = {
+            specials   : [{"menu":"specials","id":"specials_1","image":"fit_slam.jpg","title":"Fit Slam","description":"Egg whites scrambled together with fresh spinach and grape tomatoes, plus two turkey bacon strips, an English muffin and seasonal fruit.","price":"8.99"},{"menu":"specials","id":"specials_2","image":"ultimate_omelette.jpg","title":"Ultimate Omelette","description":"Three-egg omelette with crumbled sausage, bacon, fire-roasted bell peppers and onions, mushrooms, diced tomatoes and shredded Cheddar cheese.","price":"7.50"},{"menu":"specials","id":"specials_3","image":"new__cali_club_sandwich.jpg","title":"NEW! Cali Club Sandwich","description":"Thinly sliced turkey breast, ham, crisp bacon, Swiss cheese and fresh avocado. Served on toasted 7-grain bread with sun-dried tomato mayo, lettuce and tomato.","price":"6.99"},{"menu":"specials","id":"specials_4","image":"club_sandwich.jpg","title":"Club Sandwich","description":"Thinly sliced turkey breast, crisp bacon, lettuce, tomato and mayo on toasted 7-grain bread.","price":"6.99"}],
+            breakfast  : [{"menu":"breakfast","id":"breakfast_1","image":"build_your_own_grand_slam.jpg","title":"Build Your Own Grand Slam","description":"Two pancakes, two sausage links, two strips of bacon and two eggs.","price":"6.98"},{"menu":"breakfast","id":"breakfast_2","image":"all_american_slam.jpg","title":"All-American Slam","description":"Three scrambled eggs with Cheddar cheese, two bacon strips and two sausage links, plus hash browns and choice of bread.","price":"9.19"},{"menu":"breakfast","id":"breakfast_3","image":"the_grand_slamwich.jpg","title":"The Grand Slamwich","description":"Two scrambled eggs, crumbled sausage, bacon, shaved ham and American cheese on potato bread grilled with a maple spice spread.","price":"6.54"},{"menu":"breakfast","id":"breakfast_4","image":"belgian_waffle_slam.jpg","title":"Belgian Waffle Slam","description":"A golden waffle served with two eggs, two bacon strips and two sausage links.","price":"7.45"},{"menu":"breakfast","id":"breakfast_5","image":"lumberjack_slam.jpg","title":"Lumberjack Slam","description":"Two buttermilk pancakes, a slice of grilled ham, two bacon strips, two sausage links and two eggs, plus hash browns and choice of bread.","price":"4.78"},{"menu":"breakfast","id":"breakfast_6","image":"french_toast_slam.jpg","title":"French Toast Slam","description":"Two thick slices of our fabulous French toast with two eggs, two bacon strips and two sausage links.","price":"8.99"},{"menu":"breakfast","id":"breakfast_7","image":"fit_slam.jpg","title":"Fit Slam","description":"Egg whites scrambled together with fresh spinach and grape tomatoes, plus two turkey bacon strips, an English muffin and seasonal fruit.","price":"8.99"},{"menu":"breakfast","id":"breakfast_8","image":"meat_lover_s_omelette.jpg","title":"Meat Lover's Omelette","description":"Three egg omelette with prime rib, crumbled chorizo sausage, bacon, fire-roasted bell peppers and onions, Cheddar cheese and Pepper Jack queso.","price":"8.99"},{"menu":"breakfast","id":"breakfast_9","image":"ham___cheese_omelette.jpg","title":"Ham & Cheese Omelette","description":"Three-egg omelette with diced ham, melted Swiss and American cheeses. Served with hash browns and choice of bread.","price":"8.99"},{"menu":"breakfast","id":"breakfast_10","image":"philly_cheesesteak_omelette.jpg","title":"Philly Cheesesteak Omelette","description":"Three egg omelette with grilled prime rib, fire-roasted bell peppers and onions, sautéed mushrooms and melted Swiss cheese.","price":"8.99"},{"menu":"breakfast","id":"breakfast_11","image":"loaded_veggie_omelette.jpg","title":"Loaded Veggie Omelette","description":"Three-egg omelette with fresh spinach, mushrooms, sautéed zucchini and squash, diced tomatoes and melted Swiss cheese.","price":"8.99"},{"menu":"breakfast","id":"breakfast_12","image":"ultimate_omelette.jpg","title":"Ultimate Omelette","description":"Three-egg omelette with crumbled sausage, bacon, fire-roasted bell peppers and onions, mushrooms, diced tomatoes and shredded Cheddar cheese.","price":"5.50"},{"menu":"breakfast","id":"breakfast_13","image":"ultimate_skillet.jpg","title":"Ultimate Skillet","description":"Grilled sausage, fresh spinach, fire-roasted bell peppers and onions, mushrooms, grape tomatoes and red-skinned potatoes topped with Cheddar cheese and eggs.","price":"9.34"},{"menu":"breakfast","id":"breakfast_14","image":"hearty_breakfast_skillet.jpg","title":"Hearty Breakfast Skillet","description":"A hearty breakfast sausage with seasoned red-skinned potatoes, sautéed mushrooms and fire-roasted bell peppers and onions served on a sizzlin’ hot skillet.","price":"6.43"},{"menu":"breakfast","id":"breakfast_15","image":"fit_fare_veggie_skillet.jpg","title":"Fit Fare Veggie Skillet","description":"Red-skinned potatoes, fire-roasted bell peppers and onions, mushrooms and broccoli topped with two egg whites scrambled with spinach and grape tomatoes.","price":"8.99"},{"menu":"breakfast","id":"breakfast_16","image":"santa_fe_skillet.jpg","title":"Santa Fe Skillet","description":"Crumbled chorizo sausage, fire-roasted bell peppers and onions, mushrooms and seasoned red-skinned potatoes served on a sizzlin’ hot skillet.","price":"8.99"},{"menu":"breakfast","id":"breakfast_17","image":"cinnamon_pancake_breakfast.jpg","title":"Cinnamon Pancake Breakfast","description":"Cinnamon sauce and cream cheese icing drizzled over two buttermilk pancakes. Served with two eggs and hash browns, plus your choice of two strips of bacon or two sausage links and a side of warm syrup.","price":"8.99"},{"menu":"breakfast","id":"breakfast_19","image":"banana_pecan_pancake_breakfast.jpg","title":"Banana Pecan Pancake Breakfast","description":"Glazed pecans cooked inside two wheat pancakes and topped with banana slices. Served with two scrambled egg whites and two strips of turkey bacon.","price":"8.99"},{"menu":"breakfast","id":"breakfast_20","image":"blueberry_pancake_breakfast.jpg","title":"Blueberry Pancake Breakfast","description":"Blueberries cooked inside two buttermilk pancakes. Served with two eggs and hash browns, plus your choice of two strips of bacon or two sausage links.","price":"8.99"},{"menu":"breakfast","id":"breakfast_21","image":"country_fried_steak___eggs.jpg","title":"Country-Fried Steak & Eggs","description":"A golden-fried chopped beef steak smothered in rich country gravy. Served with two eggs, hash browns and choice of bread.","price":"8.99"},{"menu":"breakfast","id":"breakfast_22","image":"t_bone_steak___eggs.jpg","title":"T-Bone Steak & Eggs","description":"A tender 13 oz. seasoned T-Bone steak served with two eggs, hash browns and choice of bread.","price":"8.99"},{"menu":"breakfast","id":"breakfast_23","image":"moons_over_my_hammy.jpg","title":"Moons Over My Hammy","description":"Our classic ham and scrambled egg sandwich with Swiss and American cheeses on grilled sourdough. Served with hash browns.","price":"8.99"},{"menu":"breakfast","id":"breakfast_24","image":"breakfast_sides.jpg","title":"Breakfast Sides","description":"Breakfast just isn’t complete without a little something on the side. And these delicious choices aren’t limited to breakfast – add them to any meal on the menu, night or day.","price":"8.99"}],
+            lunch      : [{"menu":"lunch","id":"lunch_1","image":"classic_burger.jpg","title":"Classic Burger","description":"A hand-pressed beef patty served with lettuce, tomato, red onions and pickles.","price":"6.99"},{"menu":"lunch","id":"lunch_2","image":"new__spicy_sriracha_burger.jpg","title":"NEW! Spicy Sriracha Burger","description":"A Sriracha seasoned, hand-pressed 100% beef patty topped with Cheddar cheese, bacon, jalapeños, creamy Sriracha sauce, lettuce, tomato, red onions and pickles.","price":"7.43"},{"menu":"lunch","id":"lunch_3","image":"new__bourbon_bacon_burger.jpg","title":"NEW! Bourbon Bacon Burger","description":"A 100% beef patty topped with Cheddar cheese, bacon, sautéed mushrooms, bell peppers and onions. Served on a Cheddar bun with sweet bourbon sauce.","price":"5.43"},{"menu":"lunch","id":"lunch_4","image":"new__chicken_philly_melt.jpg","title":"NEW! Chicken Philly Melt","description":"Roasted seasoned chicken, sautéed mushrooms, fire-roasted bell peppers and onions, shredded Italian cheeses and Pepper Jack queso. Served on a hoagie roll.","price":"8.32"},{"menu":"lunch","id":"lunch_5","image":"new__prime_rib_philly_melt.jpg","title":"NEW! Prime Rib Philly Melt","description":"Juicy prime rib, sauteed mushrooms, fire-roasted bell peppers and onions, shredded Italian cheeses and Pepper Jack queso. Served on a hoagie roll.","price":"9.45"},{"menu":"lunch","id":"lunch_6","image":"new__cali_club_sandwich.jpg","title":"NEW! Cali Club Sandwich","description":"Thinly sliced turkey breast, ham, crisp bacon, Swiss cheese and fresh avocado. Served on toasted 7-grain bread with sun-dried tomato mayo, lettuce and tomato.","price":"7.99"},{"menu":"lunch","id":"lunch_7","image":"club_sandwich.jpg","title":"Club Sandwich","description":"Thinly sliced turkey breast, crisp bacon, lettuce, tomato and mayo on toasted 7-grain bread.","price":"4.55"},{"menu":"lunch","id":"lunch_8","image":"bacon_avocado_cheeseburger.jpg","title":"Bacon Avocado Cheeseburger","description":"Crispy bacon, fresh avocado and melted Cheddar cheese top a hand-pressed 100% beef patty. Served with mayo, lettuce, tomato, red onions and pickles.","price":"6.34"},{"menu":"lunch","id":"lunch_9","image":"bacon_slamburger_.jpg","title":"Bacon Slamburger™","description":"Crispy hash browns, an egg cooked to order and two bacon strips top a hand-pressed 100% beef patty covered with Pepper Jack queso.","price":"2.40"},{"menu":"lunch","id":"lunch_10","image":"double_cheeseburger.jpg","title":"Double Cheeseburger","description":"Your choice of American, Swiss or Cheddar cheese tops two hand-pressed 100% beef patties. Served with lettuce, tomato, red onions and pickles.","price":"6.99"},{"menu":"lunch","id":"lunch_11","image":"chicken_bacon_classic.jpg","title":"Chicken Bacon Classic","description":"A grilled seasoned chicken breast topped with melted Swiss cheese, bacon and a creamy pepper sauce.","price":"6.99"},{"menu":"lunch","id":"lunch_12","image":"build_your_own_burger.jpg","title":"Build Your Own Burger","description":"It comes with lettuce, tomato, red onions and pickles – now follow the steps below and make it your own.","price":"6.99"},{"menu":"lunch","id":"lunch_13","image":"chicken_salad_sandwich.jpg","title":"Chicken Salad Sandwich","description":"Homemade with roasted seasoned chicken, celery, red grapes, toasted almonds and mayo. Served with spring mix and tomato on toasted 7-grain bread.","price":"6.99"},{"menu":"lunch","id":"lunch_14","image":"the_super_bird_.jpg","title":"The Super Bird®","description":"Thinly sliced turkey breast with melted Swiss cheese, crisp bacon and tomato on grilled sourdough.","price":"6.99"},{"menu":"lunch","id":"lunch_15","image":"lunch_sides.jpg","title":"Lunch Sides","description":"Add a little extra to your lunch with these tasty options. And feel free to pair them with other menu items as well to create the perfect meal.","price":"6.99"}]
+        };
+
+        /*---- Pages ----*/
+
+        app.page = ko.observable('specials');
+
+        app.page.subscribe(function() {
+            app.viewMenuItem(false);
+        });
+
+        app.pageTitle = ko.pureComputed(function() {
+            if (app.viewMenuItem()) {
+                return "View Menu Item";
+            }
+            var text = 'Title';
+            switch(app.page()) {
+                case 'specials' : text = "Today's Specials"; break;
+                case 'breakfast': text = "Breakfast Menu"; break;
+                case 'lunch'    : text = "Lunch Menu"; break;
+                case 'myorder'  : text = "My Order"; break;
+                case 'thanks'   : text = "Thank you!"; break;
+            }
+            return text;
+        });
+
+        app.scrollTo = function(id) {
+            var el = $("#" + id);
+            el.find('.card').css('border-color', 'green');
+            setTimeout(function() {el.find('.card').css('border-color', '#e5e5e5');}, 3000);
+            $("html, body").animate({ scrollTop: el.offset().top }, 500);
+            return true;
+        };
+
+        /*---- Menus ----*/
+
+        app.menus = {
+            specials   : ko.observableArray(),
+            breakfast  : ko.observableArray(),
+            lunch      : ko.observableArray(),
+            myorder    : ko.observableArray()
+        };
+
+        app.getMenuData = function(menu) {
+            /* Pretend ajax call */
+            switch(menu) {
+                case 'specials' : return app.database.specials; break;
+                case 'breakfast': return app.database.breakfast; break;
+                case 'lunch'    : return app.database.lunch; break;
+            }
+        };
+
+        app.MenuItem = function(item) {
+            var self = this;
+            this.id = item.id;
+            this.image = item.image;
+            this.title = item.title;
+            this.description = item.description;
+            this.price = item.price;
+            this.specialRequests = ko.observable('');
+
+            /* order */
+            this.ordered = ko.observable(false);
+            this.orderButtonText = ko.observable('Add to Order');
+            this.toggleAddToOrder = function() {
+                if (self.ordered()) {
+                    app.menus.myorder.remove(self);
+                    self.ordered(false);
+                    self.orderButtonText('Add to Order');
+                    self.specialRequests('');
+                }
+                else {
+                    app.menus.myorder.push(self);
+                    self.ordered(true);
+                    self.orderButtonText('Remove from Order');
+                }
+                if (self.view()) {
+                    self.toggleItemView();
+                }
+            };
+
+            /* view */
+            this.view = ko.observable(false);
+            this.viewButtonText = ko.observable('View');
+            this.toggleItemView = function() {
+                if (self.view()) {
+                    self.view(false);
+                    self.viewButtonText('View');
+                    app.viewMenuItem(false);
+                    app.scrollTo(self.id);
+                }
+                else {
+                    self.view(true);
+                    self.viewButtonText('Cancel');
+                    app.viewMenuItem(self);
+                    $('html, body').scrollTop(0);
+                }
+            };
+        };
+
+        app.viewMenuItem = ko.observable(false);
+
+        app.initializeMenus = ko.computed(function() {
+            switch(app.page()) {
+                case 'specials' :
+                    if (app.menus.specials().length > 0) {return true;}
+                    var data = app.getMenuData('specials');
+                    app.menus.specials(data);
+                    break;
+                case 'breakfast' :
+                    if (app.menus.breakfast().length > 0) {return true;}
+                    var data = app.getMenuData('breakfast');
+                    app.menus.breakfast(data);
+                    break;
+                case 'lunch' :
+                    if (app.menus.lunch().length > 0) {return true;}
+                    var data = app.getMenuData('lunch');
+                    app.menus.lunch(data);
+                    break;
+            }
+            return true;
+        });
+
+        /*---- Place order ----*/
+
+        app.subtotal = ko.observable(0);
+
+        app.tax = ko.observable(0);
+
+        app.total = ko.observable(0);
+
+        app.calculatePrice = ko.computed(function() {
+            var order = app.menus.myorder();
+
+            if (order.length < 1) {return false;}
+
+            var subtotal = order.map(function(obj) {
+                return parseFloat(obj.price);
+            }).reduce(function(previousValue, currentValue, i, array) {
+                return parseFloat(previousValue) + parseFloat(currentValue);
+            });
+
+            var tax = (subtotal * 8 / 100);
+
+            var total = parseFloat(subtotal) + parseFloat(tax);
+
+            app.subtotal(subtotal.toFixed(2));
+            app.tax(tax.toFixed(2));
+            app.total(total.toFixed(2));
+
+            return true;
+        });
+
+        app.placeOrder = function() {
+            var temp = app.menus.myorder().map(function(item) {
+                return item;
+            }).forEach(function(obj) {
+                obj.toggleAddToOrder();
+            });
+            app.page('thanks');
+        };
+
+        /*---- Init Kockout ----*/
+
+        ko.components.register('menu-item', {
+            viewModel: function(params) {return new app.MenuItem(params.item)},
+            template: { element: document.getElementById('menu-item-template') },
+        });
+
+        ko.components.register('view-item', {
+            viewModel: function() {return app.viewMenuItem();},
+            template: { element: document.getElementById('view-item-template') },
+        });
+
+        ko.components.register('my-order-item', {
+            viewModel: function(params) {return params.item;},
+            template: { element: document.getElementById('my-order-template') },
+        });
+
+        ko.applyBindings(app);
+
+        /* Director for tab navigation */
+
+        Router({'/:filter': app.page}).configure({'after': function(){$('html, body').scrollTop(0);}}).init('specials');
+
+        function chromeScrollHack() {
+            $('html, body').scrollTop(0);
+        }
+
+        $( document ).ready(function() {
+            window.setTimeout(chromeScrollHack,100);
+        });
+    </script>
+</body>
+</html>
